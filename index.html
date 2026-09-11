@@ -6,27 +6,57 @@
     <title>Personal Inventory</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
-        .item-card { background: white; padding: 15px; margin: 10px 0; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .item-card { background: white; padding: 10px; margin: 5px 0; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .item-title { margin: 0 0 5px 0; color: #333; }
         .grid-container {
             display: grid;
-            grid-template-columns: 5% 42.5% 5% 42.5% 5%;
+            grid-template-columns: 5% 40% 5% 45% 5%;
+        }
+        .grid-container2 {
+            display: grid;
+            grid-template-columns: 45% 5% 45%;
+        }
+        label {
+            display: inline-block;
+            height: 20px;
         }
     </style>
 </head>
 <body>
 
 
-<div class = 'grid-container'>
+<div class = 'grid-container' id = 'grid-main'>
     <div></div>
-    <div>
-        <h1>Parent 1</h1>
-        <div id="parent-1"></div>
+    <div class = 'grid-container2' id = 'parent-grid'>
+        <div>
+            <h1>Parent 1</h1>
+            <div class = "grid-container2">
+                <button id = 'importp1'>import</button>
+                <div></div>
+                <button id = 'exportp1'>export</button>
+            </div>
+            <div id="parent-1"></div>
+        </div>
+        <div></div>
+        <div>
+            <h1>Parent 2</h1>
+            <div class = "grid-container2">
+                <button id = 'importp2'>import</button>
+                <div></div>
+                <button id = 'exportp2'>export</button>
+            </div>
+            <div id="parent-2"></div>
+        </div>
     </div>
-    <div></div>
     <div>
-        <h1>Parent 2</h1>
-        <div id="parent-2"></div>
+        <button id = "breedButton">Breed</button>
+    </div>
+
+
+    <div>
+        <h1>Child</h1>
+        <button id = 'exportc1'>export</button>
+        <div id="child-1"></div>
     </div>
     <div></div>
 </div>

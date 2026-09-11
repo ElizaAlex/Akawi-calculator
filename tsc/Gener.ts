@@ -1,42 +1,17 @@
 type GeneTuple<T> = [T, T] | undefined;
 
 type GeneSet = {
-  BaseColor: GeneTuple<Genes.BaseColor>;
-  Scale: GeneTuple<Genes.Scale>;
-  MultiColorism: GeneTuple<Genes.MultiColorism>;
-  Dilution: GeneTuple<Genes.Dilution>;
-  Point: GeneTuple<Genes.Point>;
-  Silver: GeneTuple<Genes.Silver>;
-  GildPattern: GeneTuple<Genes.GildPattern>;
-  Depth: GeneTuple<Genes.Depth>;
-  Breaking: GeneTuple<Genes.Breaking>;
-  Albino: GeneTuple<Genes.Albinism>;
-  AccentingColor: GeneTuple<Genes.AccentingColor>;
-  AccentGradient: GeneTuple<Genes.AccentGradient>;
-  AccentEyespot: GeneTuple<Genes.AccentEyespot>;
-  AccentFin: GeneTuple<Genes.AccentingFin>;
-};
+  [T in keyof typeof Genes] : GeneTuple<T>;
+}
 
 const parents: GeneSet[] = [createBlankGeneSet(), createBlankGeneSet()];
 
 function createBlankGeneSet(): GeneSet {
-  let temp = {};
-  return {
-    BaseColor: [0,0],
-    Scale: [0,0],
-    MultiColorism:[0,0],
-    Dilution:[0,0],
-    Point: [0,0],
-    Silver:[0,0],
-    GildPattern:[0,0],
-    Depth:[0,0],
-    Breaking:[0,0],
-    Albino:[0,0],
-    AccentingColor:[0,0],
-    AccentGradient:[0,0],
-    AccentEyespot: [0,0],
-    AccentFin:[0,0],
-  }
+  let temp: Record<string, [number, number]> = {};
+  Object.keys(Genes).forEach(gene => {
+    temp[gene] = [0,0];
+  });
+  return temp as unknown as GeneSet;
 }
 
 function getRandomGene<T>(genes: GeneTuple<T>): T {
@@ -53,22 +28,17 @@ function InheritGene<T>(g1: GeneTuple<T>, g2: GeneTuple<T>): GeneTuple<T> {
 }
 
 function breed(genes1: GeneSet, genes2: GeneSet): GeneSet {
-  return {
-    BaseColor: InheritGene(genes1.BaseColor, genes2.BaseColor),
-    Scale: InheritGene(genes1.Scale, genes2.Scale),
-    MultiColorism: InheritGene(genes1.MultiColorism, genes2.MultiColorism),
-    Dilution: InheritGene(genes1.Dilution, genes2.Dilution),
-    Point: InheritGene(genes1.Point, genes2.Point),
-    Silver: InheritGene(genes1.Silver, genes2.Silver),
-    GildPattern: InheritGene(genes1.GildPattern, genes2.GildPattern),
-    Depth: InheritGene(genes1.Depth, genes2.Depth),
-    Breaking: InheritGene(genes1.Breaking, genes2.Breaking),
-    Albino: InheritGene(genes1.Albino, genes2.Albino),
-    AccentingColor: InheritGene(genes1.AccentingColor, genes2.AccentingColor),
-    AccentGradient: InheritGene(genes1.AccentGradient, genes2.AccentGradient),
-    AccentEyespot: InheritGene(genes1.AccentEyespot, genes2.AccentEyespot),
-    AccentFin: InheritGene(genes1.AccentFin, genes2.AccentFin),
-  };
+  let temp: any = {};
+  Object.keys(Genes).forEach(gene => {
+    temp[gene] = InheritGene(genes1[gene as keyof GeneSet],genes2[gene as keyof GeneSet]);
+  });
+
+  return temp as unknown as GeneSet;
+}
+
+function translateIntToString(val: number, geneName: string){
+  const Gene = Genes[geneName as keyof typeof Genes];
+  return Gene[val];
 }
 
 function getCommonName(s: string): string {
@@ -83,7 +53,9 @@ function getGeneOptions(s:string, id: number) {
   }).join('');
 }
 
-const GenParentHTML = (elementId: string, parent: 0 | 1) => {
+const getId = (gene: string, parent:number, i: number) => `${gene}_${parent}_${i}`;
+
+const GenParentHTML = (elementId: string, pid:number) => {
   const container = document.getElementById(elementId);
 
   if (!container) {
@@ -92,39 +64,15 @@ const GenParentHTML = (elementId: string, parent: 0 | 1) => {
   }
   console.log('Container found.');
 
-
-  const getId = (gene: string, i: number) => `${gene}p${parent}g${i}`;
-
-
-
-
   container.innerHTML = Object.keys(Genes).map(gene => {
-    const setGenes = () => {
-      if (!document) return;
-      const p : GeneSet = parents[parent];
-      const g0 = document.getElementById(getId(gene,0))?.innerHTML;
-      const g1 = document.getElementById(getId(gene,1))?.innerHTML;
-
-      if (g0 === undefined || g1 === undefined) throw new Error('Could not find element: ' + gene);
-
-      try {
-        const Gene = Genes[gene as unknown as keyof typeof Genes]
-        const G0 = Gene[g0 as keyof typeof Gene];
-        const G1 = Gene[g1 as keyof typeof Gene];
-        p[]
-      }
-
-
-
-    };
     return `
         <div class="item-card">
             <h3 class="item-title">${getCommonName(gene)}</h3>
             <label for="genes">Choose genes</label>
-            <select name="genes" id = ${getId(gene,0)} onchange = "setGenes()">
+            <select name="genes" id = ${getId(gene,pid, 0)}>
                 ${getGeneOptions(gene, 0)}
             </select>
-            <select name="genes" id = ${getId(gene,0)} onchange = "setGenes()">
+            <select name="genes" id = ${getId(gene,pid, 1)}>
                 ${getGeneOptions(gene, 1)}
             </select>
         </div>
@@ -134,4 +82,73 @@ const GenParentHTML = (elementId: string, parent: 0 | 1) => {
 
 GenParentHTML('parent-1', 0);
 GenParentHTML('parent-2', 1);
+
+
+document.getElementById('grid-main')?.addEventListener('change', (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  const targetId = target.id;
+  const params = targetId.split('_');
+  if (params.length !== 3) {
+    console.error('Invalid Parameters: ' + params);
+    return;
+  }
+
+  console.log(targetId);
+
+  try {
+    const [geneName, parentNo, geneNo] = params;
+    const parentId =  parseInt(parentNo);
+    const geneId = parseInt(geneNo);
+
+    console.log(`Update Event Detected: ${geneName} - parentId: ${parentId} - geneId: ${geneId}`);
+
+
+    const p: GeneSet = parents[parentId];
+    const geneVal = target.value;
+    const Gene = Genes[geneName as keyof GeneSet];
+    const geneValInt = Gene[geneVal as keyof typeof Gene];
+
+    const tuple = p[geneName as keyof GeneSet];
+    console.dir(tuple);
+    tuple![geneId] = parseInt(geneValInt) as any;
+
+    console.dir(p);
+  } catch(e){
+    console.error(e);
+  }
+});
+
+let child: GeneSet | null = null;
+document.getElementById('breedButton')?.addEventListener('click', (event: Event) => {
+  child = breed(parents[0],parents[1]);
+
+  if (child === null) {
+    console.error('No child found');
+    return;
+  }
+
+  const container = document.getElementById('child-1');
+
+  if (!container) {
+    console.error('No container found');
+    return;
+  }
+  console.log('Container found.');
+
+
+
+
+  container.innerHTML = Object.keys(Genes).map(gene => {
+    return `
+        <div class="item-card">
+            <h3 class="item-title">${getCommonName(gene)}</h3>
+            <label>${child![gene as keyof GeneSet]?.map((val) => translateIntToString(parseInt(val), gene))}</label>
+        </div>
+  `
+  }).join('');
+
+})
+
+
+
 
