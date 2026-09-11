@@ -1,9 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Inventory</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f9f9f9; }
+        .item-card { background: white; padding: 15px; margin: 10px 0; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .item-title { margin: 0 0 5px 0; color: #333; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 5% 42.5% 5% 42.5% 5%;
+        }
+    </style>
+</head>
 <body>
 
-<h1>My First Heading</h1>
-<p>My first paragraph.</p>
 
+<div class = 'grid-container'>
+    <div></div>
+    <div>
+        <h1>Parent 1</h1>
+        <div id="parent-1"></div>
+    </div>
+    <div></div>
+    <div>
+        <h1>Parent 2</h1>
+        <div id="parent-2"></div>
+    </div>
+    <div></div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
